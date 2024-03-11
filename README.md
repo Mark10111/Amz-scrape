@@ -1,4 +1,5 @@
 Amazon Web Scraper
+
 This Python script scrapes product information from Amazon.it and saves it to a JSON file. It utilizes the BeautifulSoup library for web scraping and requests for sending HTTP requests.
 
 Features
