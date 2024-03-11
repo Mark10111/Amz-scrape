@@ -13,13 +13,9 @@ filename="products3.json"
 # Function to extract Product Title
 
 
-
-
 def get_next_pg(soup):
     try:
-        pagination_element = soup.find('span',
-									class_='s-pagination-item s-pagination-disabled'
-									, string=lambda text: text.isdigit())
+        pagination_element = soup.find('span',class_='s-pagination-item s-pagination-disabled', string=lambda text: text.isdigit())
         if pagination_element:
             page_number = int(pagination_element.text.strip())
             next_page_element = soup.find('a',
@@ -41,19 +37,6 @@ def get_next_pg(soup):
         
     return page_number, next_page_url
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 def fetch_links(soup):
     # Check if file is empty
     if os.path.getsize(filename) == 0:
@@ -68,12 +51,9 @@ def fetch_links(soup):
             data = json.load(infile)
     except FileNotFoundError:
         data = []
-
-
     for result in results:
         # Extract ASIN
         asin = result['data-asin']
-
         # Extract title
         try:
             #title_element = result.find('span', class_= ['a-size-medium', 'a-color-base', 'a-text-normal']) old one, gave "" and "Sponsorizzato" problems
@@ -114,18 +94,9 @@ def fetch_links(soup):
             #print('price:', price)#,"-", type(price))
             #print("timestamp", str(datetime.now().strftime("%Y-%m-%d %H:%M")))    
             products.append(product)
-
     data.extend(products)
-
     with open(filename, 'w') as outfile:
         json.dump(data, outfile, indent=4)
-
-
-
-
-
-
-
 
 
 def sendRequest(urltosend):
@@ -147,31 +118,23 @@ def sendRequest(urltosend):
 
 	return soup
 
-
-
-
-
-
-
-
-
 if __name__ == '__main__':
 
 
 	# The webpage URL
 	#URL = "https://www.amazon.it/s?k=laptop&i=computers&__mk_it_IT=%C3%85M%C3%85%C5%BD%C3%95%C3%91&crid=E7GZISO0AAIT&sprefix=laptop%2Ccomputers%2C294&ref=nb_sb_noss_1"
 	URL = [	
-    "https://www.amazon.it/s?k=xiaomi&ref=nb_sb_noss_1",
-    "https://www.amazon.it/s?k=scheda+video&i=computers&__mk_it_IT=%C3%85M%C3%85%C5%BD%C3%95%C3%91&crid=E7GZISO0AAIT&sprefix=laptop%2Ccomputers%2C294&ref=nb_sb_noss_1",
-    "https://www.amazon.it/s?k=iphone+14+pro&i=computers&__mk_it_IT=%C3%85M%C3%85%C5%BD%C3%95%C3%91&crid=E7GZISO0AAIT&sprefix=laptop%2Ccomputers%2C294&ref=nb_sb_noss_1",
-    "https://www.amazon.it/s?k=cuffie+wireless&i=computers&__mk_it_IT=%C3%85M%C3%85%C5%BD%C3%95%C3%91&crid=E7GZISO0AAIT&sprefix=laptop%2Ccomputers%2C294&ref=nb_sb_noss_1",
-    "https://www.amazon.it/s?k=mouse+gaming&i=computers&__mk_it_IT=%C3%85M%C3%85%C5%BD%C3%95%C3%91&crid=E7GZISO0AAIT&sprefix=laptop%2Ccomputers%2C294&ref=nb_sb_noss_1",
-    "https://www.amazon.it/s?k=snapdragon+gen+1&i=computers&__mk_it_IT=%C3%85M%C3%85%C5%BD%C3%95%C3%91&crid=E7GZISO0AAIT&sprefix=laptop%2Ccomputers%2C294&ref=nb_sb_noss_1",
-    "https://www.amazon.it/s?k=macbook&i=computers&__mk_it_IT=%C3%85M%C3%85%C5%BD%C3%95%C3%91&crid=E7GZISO0AAIT&sprefix=laptop%2Ccomputers%2C294&ref=nb_sb_noss_1",
-    "https://www.amazon.it/s?k=snapdragon+gen+1&i=computers&__mk_it_IT=%C3%85M%C3%85%C5%BD%C3%95%C3%91&crid=E7GZISO0AAIT&sprefix=laptop%2Ccomputers%2C294&ref=nb_sb_noss_1",
-    "https://www.amazon.it/s?k=hard+disk+esterno&i=computers&__mk_it_IT=%C3%85M%C3%85%C5%BD%C3%95%C3%91&ref=nb_sb_noss",
-    "https://www.amazon.it/s?k=low+profile+keyboard&i=computers&__mk_it_IT=%C3%85M%C3%85%C5%BD%C3%95%C3%91&crid=E7GZISO0AAIT&sprefix=laptop%2Ccomputers%2C294&ref=nb_sb_noss_1"
-]
+	    "https://www.amazon.it/s?k=xiaomi&ref=nb_sb_noss_1",
+	    "https://www.amazon.it/s?k=scheda+video&i=computers&__mk_it_IT=%C3%85M%C3%85%C5%BD%C3%95%C3%91&crid=E7GZISO0AAIT&sprefix=laptop%2Ccomputers%2C294&ref=nb_sb_noss_1",
+	    "https://www.amazon.it/s?k=iphone+14+pro&i=computers&__mk_it_IT=%C3%85M%C3%85%C5%BD%C3%95%C3%91&crid=E7GZISO0AAIT&sprefix=laptop%2Ccomputers%2C294&ref=nb_sb_noss_1",
+	    "https://www.amazon.it/s?k=cuffie+wireless&i=computers&__mk_it_IT=%C3%85M%C3%85%C5%BD%C3%95%C3%91&crid=E7GZISO0AAIT&sprefix=laptop%2Ccomputers%2C294&ref=nb_sb_noss_1",
+	    "https://www.amazon.it/s?k=mouse+gaming&i=computers&__mk_it_IT=%C3%85M%C3%85%C5%BD%C3%95%C3%91&crid=E7GZISO0AAIT&sprefix=laptop%2Ccomputers%2C294&ref=nb_sb_noss_1",
+	    "https://www.amazon.it/s?k=snapdragon+gen+1&i=computers&__mk_it_IT=%C3%85M%C3%85%C5%BD%C3%95%C3%91&crid=E7GZISO0AAIT&sprefix=laptop%2Ccomputers%2C294&ref=nb_sb_noss_1",
+	    "https://www.amazon.it/s?k=macbook&i=computers&__mk_it_IT=%C3%85M%C3%85%C5%BD%C3%95%C3%91&crid=E7GZISO0AAIT&sprefix=laptop%2Ccomputers%2C294&ref=nb_sb_noss_1",
+	    "https://www.amazon.it/s?k=snapdragon+gen+1&i=computers&__mk_it_IT=%C3%85M%C3%85%C5%BD%C3%95%C3%91&crid=E7GZISO0AAIT&sprefix=laptop%2Ccomputers%2C294&ref=nb_sb_noss_1",
+	    "https://www.amazon.it/s?k=hard+disk+esterno&i=computers&__mk_it_IT=%C3%85M%C3%85%C5%BD%C3%95%C3%91&ref=nb_sb_noss",
+	    "https://www.amazon.it/s?k=low+profile+keyboard&i=computers&__mk_it_IT=%C3%85M%C3%85%C5%BD%C3%95%C3%91&crid=E7GZISO0AAIT&sprefix=laptop%2Ccomputers%2C294&ref=nb_sb_noss_1"
+	]
 
 	xi = 0
 	while xi < len(URL):
