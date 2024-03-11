@@ -4,7 +4,7 @@ import json
 def main2(filename):
     #filename = "products3.json"
 
-    # this script removes duplicate items from the products22.json file that have been registered on the same day + appends newer items prices and timestamp to the older already registered items
+    # this script removes duplicate items from the products3.json file that have been registered on the same day + appends newer items prices and timestamp to the older already registered items
     print("starting script")
 
     with open(filename, 'r') as f:
