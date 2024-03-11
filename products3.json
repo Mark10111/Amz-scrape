@@ -1,1 +1,10 @@
-
+[
+    {
+        "title": "Product Title 1 example",
+        "price": "29.99",
+        "asin": "B123456789",
+        "rating": "4.5",
+        "review_count": "100",
+        "timestamp": "2023-12-31 10:15"
+    }
+]
