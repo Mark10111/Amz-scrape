@@ -122,7 +122,7 @@ if __name__ == '__main__':
 
 
 	# The webpage URL
-	#URL = "https://www.amazon.it/s?k=laptop&i=computers&__mk_it_IT=%C3%85M%C3%85%C5%BD%C3%95%C3%91&crid=E7GZISO0AAIT&sprefix=laptop%2Ccomputers%2C294&ref=nb_sb_noss_1"
+	#add amazon url searches here:
 	URL = [	
 	    "https://www.amazon.com/s?k=xiaomi&ref=nb_sb_noss_1",
 	    "https://www.amazon.com/s?k=iphone+14+pro&i=computers&__mk_it_IT=%C3%85M%C3%85%C5%BD%C3%95%C3%91&crid=E7GZISO0AAIT&sprefix=laptop%2Ccomputers%2C294&ref=nb_sb_noss_1",
