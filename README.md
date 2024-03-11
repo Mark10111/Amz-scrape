@@ -25,11 +25,7 @@ Feel free to contribute to this project by submitting pull requests or reporting
 
 License
 This project is licensed under the MIT License - see the LICENSE file for details.
-# 📦 My Package
-
-(add your badges here)
-
-> *Your documentation is a direct reflection of your software, so hold it to the same standards.*
+# 📦 Amazon Web Scraper
 
 
 ## 🌟 Highlights
@@ -41,12 +37,12 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## ℹ️ Overview
 
-A paragraph explaining your work, who you are, and why you made it.
+This Python script scrapes product information from Amazon.it and saves it to a JSON file. It utilizes the BeautifulSoup library for web scraping and requests for sending HTTP requests.
 
 
 ### ✍️ Authors
 
-Mention who you are and link to your GitHub or organization's website.
+Me
 
 
 ## 🚀 Usage
@@ -54,23 +50,18 @@ Mention who you are and link to your GitHub or organization's website.
 *Show off what your software looks like in action! Try to limit it to one-liners if possible and don't delve into API specifics.*
 
 ```py
->>> import mypackage
->>> mypackage.do_stuff()
+>>> python3 product_grabber_main.py
 'Oh yeah!'
 ```
 
 
 ## ⬇️ Installation
 
-Simple, understandable installation instructions!
+Install the required Python packages listed in requirements.txt.
 
 ```bash
-pip install my-package
+pip install -r requirements.txt
 ```
-
-And be sure to specify any other minimum requirements like Python versions or operating systems.
-
-*You may be inclined to add development instructions here, don't.*
 
 
 ## 💭 Feedback and Contributing
