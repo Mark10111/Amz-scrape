@@ -15,6 +15,7 @@ Stores the scraped data in a JSON file (products3.json).
 
 ## Usage
 
+add the url searches from amazon to the list in product_grabber_main.py
 
 ```py
 >>> python3 product_grabber_main.py
