@@ -1,62 +1,78 @@
-# 📦 Amazon Web Scraper
+# Amazon Product Scraper
 
-## Overview
+A configurable Python scraper for collecting product listings from Amazon search result pages, normalizing product data, and exporting deduplicated output.
 
-This project scrapes product data from Amazon search result pages with configurable runtime options, retry/backoff handling, and SQLite-backed persistence.
+## Features
 
-The scraper now:
-- Reads inputs from `scraper_config.json` and/or CLI args.
-- Detects common captcha/blocked responses.
-- Normalizes product data before storage.
-- Stores raw records in SQLite (`products.db`) and exports deduplicated JSON (`products3.json`).
+- Config-driven scraping with optional CLI overrides
+- Retry handling with randomized delays and exponential backoff
+- Captcha/block-page signal detection
+- Product normalization (price, rating, review count, timestamp)
+- SQLite persistence for raw collected records
+- Deduplicated JSON export by ASIN with merged history
 
 ## Project Structure
 
-- `/product_grabber_main.py` - entrypoint.
-- `/scraper_config.json` - default runtime configuration.
-- `/amz_scrape/config.py` - config loading + CLI overrides.
-- `/amz_scrape/scraper.py` - request/retry/rate-limit scrape loop.
-- `/amz_scrape/parser.py` - parsing and normalization.
-- `/amz_scrape/storage.py` - SQLite persistence and JSON export.
-- `/amz_scrape/dedup.py` - dedup/merge logic.
-- `/duplicate_remover_title.py` - standalone JSON dedup utility.
-- `/tests/` - unit tests.
-
-## Installation
-
-```bash
-pip3 install -r /home/runner/work/Amz-scrape/Amz-scrape/requirements.txt
+```text
+.
+├── product_grabber_main.py      # Main entrypoint
+├── scraper_config.json          # Runtime configuration
+├── duplicate_remover_title.py   # Standalone JSON dedup utility
+├── amz_scrape/
+│   ├── config.py                # Config loading and CLI parsing
+│   ├── scraper.py               # Scraping loop and request handling
+│   ├── parser.py                # HTML parsing and normalization
+│   ├── storage.py               # SQLite storage and JSON export
+│   └── dedup.py                 # Deduplication / merge logic
+└── tests/                       # Unit tests
 ```
 
-## Usage
+## Requirements
 
-### Run with default config
+- Python 3.10+
+- Pip
+
+Install dependencies:
 
 ```bash
-python3 /home/runner/work/Amz-scrape/Amz-scrape/product_grabber_main.py
+pip install -r requirements.txt
 ```
 
-### Run with a custom config file
+## Quick Start
+
+Run with default config:
 
 ```bash
-python3 /home/runner/work/Amz-scrape/Amz-scrape/product_grabber_main.py --config /home/runner/work/Amz-scrape/Amz-scrape/scraper_config.json
+python product_grabber_main.py
 ```
 
-### Override selected settings from CLI
+Run with a custom config:
 
 ```bash
-python3 /home/runner/work/Amz-scrape/Amz-scrape/product_grabber_main.py \
+python product_grabber_main.py --config scraper_config.json
+```
+
+Override selected values from CLI:
+
+```bash
+python product_grabber_main.py \
+  --urls "https://www.amazon.com/s?k=iphone+14+pro" \
   --max-pages 10 \
   --max-retries 4 \
+  --timeout 20 \
   --min-delay 1.5 \
   --max-delay 3.0 \
-  --sqlite-db /home/runner/work/Amz-scrape/Amz-scrape/products.db \
-  --output-json /home/runner/work/Amz-scrape/Amz-scrape/products3.json
+  --backoff 2.0 \
+  --sqlite-db products.db \
+  --output-json products3.json \
+  --log-level INFO
 ```
 
-## Configuration Fields (`scraper_config.json`)
+## Configuration
 
-- `search_urls` (list[str])
+`scraper_config.json` supports:
+
+- `search_urls` (list[str], required)
 - `max_pages_per_search` (int)
 - `max_request_retries` (int)
 - `request_timeout_seconds` (int)
@@ -67,40 +83,29 @@ python3 /home/runner/work/Amz-scrape/Amz-scrape/product_grabber_main.py \
 - `sqlite_db_path` (str)
 - `user_agent_fallback` (str)
 
-## Output Schema
+## Output
 
-Each exported JSON record uses this schema:
+The scraper stores raw rows in SQLite and writes deduplicated JSON records in this shape:
 
 ```json
 {
   "title": "string",
-  "price": "string decimal or ';'-joined price history",
+  "price": "string decimal or ';'-joined history",
   "asin": "string",
   "rating": "string decimal",
   "review_count": 0,
-  "timestamp": "ISO timestamp or ';'-joined timestamp history"
+  "timestamp": "ISO timestamp or ';'-joined history"
 }
 ```
 
-## Observability
-
-Structured logs include:
-- URL start events.
-- request/network failure warnings.
-- captcha/block warnings.
-- final summary with scraped pages, failed/skipped pages, and item counts.
-
 ## Testing
 
-Run unit tests:
-
 ```bash
-python3 -m unittest discover -s /home/runner/work/Amz-scrape/Amz-scrape/tests -p "test_*.py"
+python -m unittest discover -s tests -p "test_*.py"
 ```
 
-## Limitations and Risks
+## Responsible Use
 
-- Amazon page markup changes can break selectors.
-- Automated scraping may trigger captchas or temporary blocks.
-- Use respectful request pacing and comply with target site policies and legal requirements.
-- Historical `price` and `timestamp` are merged as semicolon-delimited strings for compatibility.
+- Respect Amazon terms, robots policies, and applicable laws.
+- Use conservative request pacing to reduce load and block risk.
+- Expect selector updates when Amazon markup changes.
