@@ -3,14 +3,20 @@ import requests
 import json
 import re
 from datetime import datetime
-import locale
+from urllib.parse import urljoin
 from fake_useragent import UserAgent
 import os
-from duplicate_remover_title import *
+from duplicate_remover_title import main2
 
-products = []
-filename="products3.json"
-# Function to extract Product Title
+filename = "products3.json"
+MAX_PAGES_PER_SEARCH = 35
+MAX_REQUEST_RETRIES = 5
+REQUEST_TIMEOUT = 20
+
+try:
+    USER_AGENT = UserAgent()
+except Exception:
+    USER_AGENT = None
 
 
 def get_next_pg(soup):
@@ -22,7 +28,8 @@ def get_next_pg(soup):
                 class_='s-pagination-item s-pagination-next s-pagination-button s-pagination-separator'
                 )
             if next_page_element:
-                next_page_url = 'https://www.amazon.it' + next_page_element.get('href')
+                next_page_href = next_page_element.get('href') or ''
+                next_page_url = urljoin('https://www.amazon.com', next_page_href)
             else:
                 print('Failed to retrieve next page URL 2')
                 next_page_url = ''
@@ -38,31 +45,17 @@ def get_next_pg(soup):
     return page_number, next_page_url
 
 def fetch_links(soup):
-    # Check if file is empty
-    if os.path.getsize(filename) == 0:
-        with open(filename, 'w') as outfile:
-            json.dump([], outfile, indent=4)
-
-    # Fetch links as List of Tag Objects
+    products = []
     results = soup.find_all('div', class_='s-result-item')
-
-    try:
-        with open(filename, 'r') as infile:
-            data = json.load(infile)
-    except FileNotFoundError:
-        data = []
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
     for result in results:
-        # Extract ASIN
-        asin = result['data-asin']
-        # Extract title
+        asin = result.get('data-asin', '')
         try:
-            #title_element = result.find('span', class_= ['a-size-medium', 'a-color-base', 'a-text-normal']) old one, gave "" and "Sponsorizzato" problems
             title_element = result.find("span", {"class": "a-size-base-plus a-color-base a-text-normal"})
             title = title_element.text.strip() if title_element else ''
-        except Exception as e:
-            print('Failed to retrieve title', e)
+        except Exception:
+            title = ''
 
-        # Extract price
         price_element = result.find('span', class_='a-offscreen')
         if price_element:
             price_text = price_element.text.strip()
@@ -78,7 +71,6 @@ def fetch_links(soup):
         review_count_element = result.find('span', class_='a-size-base s-underline-text')
         review_count = review_count_element.text.strip() if review_count_element else ''
 
-        # Create a dictionary to hold the product data if the asin was registered
         if asin:
             product = {
                 'title': title,
@@ -86,117 +78,104 @@ def fetch_links(soup):
                 'asin': asin,
                 'rating': rating,
                 'review_count': review_count,
-                'timestamp': str(datetime.now().strftime("%Y-%m-%d %H:%M")),
+                'timestamp': timestamp,
             }
-	    	#print out the product description
-            #print('asin:', asin)
-            #print('title:', title)
-            #print('price:', price)#,"-", type(price))
-            #print("timestamp", str(datetime.now().strftime("%Y-%m-%d %H:%M")))    
             products.append(product)
-    data.extend(products)
-    with open(filename, 'w') as outfile:
-        json.dump(data, outfile, indent=4)
+    return products
 
 
 def sendRequest(urltosend):
-	try:
-		tof = False
-		while not tof:
-			ua = UserAgent()
-			headersrando = {'User-Agent': ua.random}
-			response = requests.get(urltosend, headers=headersrando)
-			if response.ok:
-				tof = True
-				soup = BeautifulSoup(response.content, 'lxml')
-				print('Request was successful')
-			else:
-				print(f'Request failed with status code {response.status_code}, changing header')
-				soup = None
-	except Exception as E:
-		print("def sendRequest(urltosend): ", E)
-
-	return soup
+    soup = None
+    for _ in range(MAX_REQUEST_RETRIES):
+        try:
+            user_agent = USER_AGENT.random if USER_AGENT else "Mozilla/5.0"
+            headersrando = {'User-Agent': user_agent}
+            response = requests.get(urltosend, headers=headersrando, timeout=REQUEST_TIMEOUT)
+            if response.ok:
+                soup = BeautifulSoup(response.content, 'lxml')
+                print('Request was successful')
+                break
+            print(f'Request failed with status code {response.status_code}, changing header')
+        except Exception as err:
+            print("def sendRequest(urltosend): ", err)
+    return soup
 
 if __name__ == '__main__':
+    # The webpage URL
+    # add amazon url searches here:
+    URL = [
+        "https://www.amazon.com/s?k=xiaomi&ref=nb_sb_noss_1",
+        "https://www.amazon.com/s?k=iphone+14+pro&i=computers&__mk_it_IT=%C3%85M%C3%85%C5%BD%C3%95%C3%91&crid=E7GZISO0AAIT&sprefix=laptop%2Ccomputers%2C294&ref=nb_sb_noss_1",
+        "https://www.amazon.com/s?k=macbook&i=computers&__mk_it_IT=%C3%85M%C3%85%C5%BD%C3%95%C3%91&crid=E7GZISO0AAIT&sprefix=laptop%2Ccomputers%2C294&ref=nb_sb_noss_1",
+        "https://www.amazon.com/s?k=snapdragon+gen+1&i=computers&__mk_it_IT=%C3%85M%C3%85%C5%BD%C3%95%C3%91&crid=E7GZISO0AAIT&sprefix=laptop%2Ccomputers%2C294&ref=nb_sb_noss_1",
+        "https://www.amazon.com/s?k=low+profile+keyboard&i=computers&__mk_it_IT=%C3%85M%C3%85%C5%BD%C3%95%C3%91&crid=E7GZISO0AAIT&sprefix=laptop%2Ccomputers%2C294&ref=nb_sb_noss_1",
+    ]
+
+    all_products = []
+    xi = 0
+    while xi < len(URL):
+                 
+        if xi == 0:
+            print("Starting url: ", URL[xi])
+        else:
+            print("going to the next url:", URL[xi])
+                         
+        soup = sendRequest(URL[xi])
+        if soup is None:
+            print("Skipping url because first request failed:", URL[xi])
+            xi = xi + 1
+            continue
+
+        all_products.extend(fetch_links(soup))
 
 
-	# The webpage URL
-	#add amazon url searches here:
-	URL = [	
-	    "https://www.amazon.com/s?k=xiaomi&ref=nb_sb_noss_1",
-	    "https://www.amazon.com/s?k=iphone+14+pro&i=computers&__mk_it_IT=%C3%85M%C3%85%C5%BD%C3%95%C3%91&crid=E7GZISO0AAIT&sprefix=laptop%2Ccomputers%2C294&ref=nb_sb_noss_1",
-	    "https://www.amazon.com/s?k=macbook&i=computers&__mk_it_IT=%C3%85M%C3%85%C5%BD%C3%95%C3%91&crid=E7GZISO0AAIT&sprefix=laptop%2Ccomputers%2C294&ref=nb_sb_noss_1",
-	    "https://www.amazon.com/s?k=snapdragon+gen+1&i=computers&__mk_it_IT=%C3%85M%C3%85%C5%BD%C3%95%C3%91&crid=E7GZISO0AAIT&sprefix=laptop%2Ccomputers%2C294&ref=nb_sb_noss_1",
-	    "https://www.amazon.com/s?k=low+profile+keyboard&i=computers&__mk_it_IT=%C3%85M%C3%85%C5%BD%C3%95%C3%91&crid=E7GZISO0AAIT&sprefix=laptop%2Ccomputers%2C294&ref=nb_sb_noss_1"
-	]
+        page_number, next_page_url = get_next_pg(soup)
 
-	xi = 0
-	while xi < len(URL):
-                
-		if xi ==0:
-			print("Starting url: ", URL[xi])    
-		else:
-			print("going to the next url:", URL[xi])
-                        
-		#send the first soup request to get item listing
-		soup = sendRequest(URL[xi])
-
-		#go get the individual link of each item on the current item listing link
-		fetch_links(soup)
+        match = re.search(r'page=(\d+)', next_page_url)
+        if match:
+            page_num = int(match.group(1))
+            page_str = f"page {page_num}"
+            print("\ncurrent page: ", page_str)
 
 
-		#get number of last pages and link to the next page
-		page_number, next_page_url= get_next_pg(soup)
-		#print("page number max: ", page_number,", next pg url: ",next_page_url)
-		
-		
-		match = re.search(r'page=(\d+)', next_page_url)
-		if match:
-			page_num = int(match.group(1))
-			page_str = f"page {page_num}"
-			print("\ncurrent page: ", page_str)
+        i = 1
+        if page_number == '':
+            page_number = i
+            print("changing page number to: ", page_number)
+        while i < MAX_PAGES_PER_SEARCH and next_page_url != '':
+                         
+            next_page_url_soup = sendRequest(next_page_url)
+            if next_page_url_soup is None:
+                print("Stopping pagination because request failed:", next_page_url)
+                break
 
+            all_products.extend(fetch_links(next_page_url_soup))
+            result = get_next_pg(next_page_url_soup)
+            if result is not None:
+                page_number, next_page_url = result
 
-		i = 1
-		if page_number=='':
-			page_number = i
-			print("changing page number to: ",page_number)
-		#while i < page_number or not next_page_url:
-		while i < 35 and next_page_url!='':
-                        
-			try:
-				next_page_url_soup = sendRequest(next_page_url)
-				#get number of last pages and link to the next page
-			except Exception as problem_with_next_page_url_soup:
-				print("next_page_url_soup = sendRequest(next_page_url): ")#, next_page_url_soup, "\nthe error:", problem_with_next_page_url_soup)
+            match = re.search(r'page=(\d+)', next_page_url)
+            if match:
+                page_num = int(match.group(1))
+                page_str = f"page {page_num}"
+                print("\ncurrent page: ", page_str)
+            print("\nstarting next page, current I:", i, "\nnext link: ", next_page_url, " - page number: ", page_number)
+            if page_number == '':
+                page_number = i
+                print("changing page number to: ", page_number)
+            i = i + 1
+        xi = xi + 1
 
-			#a = input("continue?")
-			#go get the individual link of each item on the current item listing link
-			fetch_links(next_page_url_soup)
-			#print("old  page url: ",next_page_url)        
-			result = get_next_pg(next_page_url_soup)
-			if result is not None:
-				page_number, next_page_url = result
-				# Rest of your code that uses `userless_var` and `next_page_url`
-			else:
-				pass
-			#print("page number max: ", page_number,", NEW next pg url: ",next_page_url)
-			
-			match = re.search(r'page=(\d+)', next_page_url)
-			if match:
-				page_num = int(match.group(1))
-				page_str = f"page {page_num}"
-				print("\ncurrent page: ", page_str)
-			print("\nstarting next page, current I:", i, "\nnext link: ", next_page_url , " - page number: ",page_number)
-			if page_number=='':
-				page_number = i
-				print("changing page number to: ",page_number)
-			i=i+1
-		xi = xi+1
+    if not os.path.exists(filename) or os.path.getsize(filename) == 0:
+        existing_products = []
+    else:
+        with open(filename, 'r') as infile:
+            existing_products = json.load(infile)
 
-print("\nProgram terminated")
-main2(filename)
+    existing_products.extend(all_products)
+    with open(filename, 'w') as outfile:
+        json.dump(existing_products, outfile, indent=4)
 
-
+    print("\nProgram terminated")
+    main2(filename)
 
