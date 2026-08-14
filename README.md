@@ -1,58 +1,48 @@
 # Amazon Product Scraper
 
-A configurable Python scraper for collecting product listings from Amazon search result pages, normalizing product data, and exporting deduplicated output.
+A production-minded Python project that collects Amazon search listing data, normalizes noisy web content, and exports clean analytics-ready records.
 
-## Features
+## Why This Project Matters
 
-- Config-driven scraping with optional CLI overrides
-- Retry handling with randomized delays and exponential backoff
-- Captcha/block-page signal detection
-- Product normalization (price, rating, review count, timestamp)
-- SQLite persistence for raw collected records
-- Deduplicated JSON export by ASIN with merged history
+This project demonstrates practical software engineering skills often used in real data and backend workflows:
 
-## Project Structure
+- Building resilient networked applications with retries and backoff
+- Parsing unstable HTML structures and normalizing inconsistent input
+- Designing a pipeline from ingestion to persistent storage and export
+- Writing testable, modular Python code with focused unit tests
+
+## Technical Highlights
+
+- Config-driven scraping with CLI overrides for flexible runs
+- Captcha/block detection safeguards in request flow
+- Data normalization for price, rating, review count, and timestamp
+- SQLite persistence layer for raw collection history
+- Deduplicated JSON export by ASIN with merged value history
+
+## Repository Layout
 
 ```text
 .
-├── product_grabber_main.py      # Main entrypoint
+├── product_grabber_main.py      # Main entrypoint and pipeline orchestration
 ├── scraper_config.json          # Runtime configuration
 ├── duplicate_remover_title.py   # Standalone JSON dedup utility
 ├── amz_scrape/
 │   ├── config.py                # Config loading and CLI parsing
-│   ├── scraper.py               # Scraping loop and request handling
-│   ├── parser.py                # HTML parsing and normalization
+│   ├── scraper.py               # Request/retry logic and scrape loop
+│   ├── parser.py                # HTML extraction and normalization
 │   ├── storage.py               # SQLite storage and JSON export
-│   └── dedup.py                 # Deduplication / merge logic
+│   └── dedup.py                 # Product merge/dedup rules
 └── tests/                       # Unit tests
-```
-
-## Requirements
-
-- Python 3.10+
-- Pip
-
-Install dependencies:
-
-```bash
-pip install -r requirements.txt
 ```
 
 ## Quick Start
 
-Run with default config:
-
 ```bash
+pip install -r requirements.txt
 python product_grabber_main.py
 ```
 
-Run with a custom config:
-
-```bash
-python product_grabber_main.py --config scraper_config.json
-```
-
-Override selected values from CLI:
+Run with custom options:
 
 ```bash
 python product_grabber_main.py \
@@ -70,7 +60,7 @@ python product_grabber_main.py \
 
 ## Configuration
 
-`scraper_config.json` supports:
+Supported `scraper_config.json` fields:
 
 - `search_urls` (list[str], required)
 - `max_pages_per_search` (int)
@@ -83,9 +73,7 @@ python product_grabber_main.py \
 - `sqlite_db_path` (str)
 - `user_agent_fallback` (str)
 
-## Output
-
-The scraper stores raw rows in SQLite and writes deduplicated JSON records in this shape:
+## Output Schema
 
 ```json
 {
@@ -98,7 +86,7 @@ The scraper stores raw rows in SQLite and writes deduplicated JSON records in th
 }
 ```
 
-## Testing
+## Validation
 
 ```bash
 python -m unittest discover -s tests -p "test_*.py"
@@ -106,6 +94,6 @@ python -m unittest discover -s tests -p "test_*.py"
 
 ## Responsible Use
 
-- Respect Amazon terms, robots policies, and applicable laws.
-- Use conservative request pacing to reduce load and block risk.
-- Expect selector updates when Amazon markup changes.
+- Follow target-site terms and applicable legal requirements.
+- Keep request rates conservative to reduce load and block risk.
+- Update selectors as page markup evolves.
