@@ -1,5 +1,4 @@
-bs4
+beautifulsoup4
 requests
-json
-re
-fake_useragent
+fake-useragent
+lxml

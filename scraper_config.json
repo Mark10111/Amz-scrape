@@ -1,0 +1,18 @@
+{
+  "search_urls": [
+    "https://www.amazon.com/s?k=xiaomi&ref=nb_sb_noss_1",
+    "https://www.amazon.com/s?k=iphone+14+pro&i=computers&__mk_it_IT=%C3%85M%C3%85%C5%BD%C3%95%C3%91&crid=E7GZISO0AAIT&sprefix=laptop%2Ccomputers%2C294&ref=nb_sb_noss_1",
+    "https://www.amazon.com/s?k=macbook&i=computers&__mk_it_IT=%C3%85M%C3%85%C5%BD%C3%95%C3%91&crid=E7GZISO0AAIT&sprefix=laptop%2Ccomputers%2C294&ref=nb_sb_noss_1",
+    "https://www.amazon.com/s?k=snapdragon+gen+1&i=computers&__mk_it_IT=%C3%85M%C3%85%C5%BD%C3%95%C3%91&crid=E7GZISO0AAIT&sprefix=laptop%2Ccomputers%2C294&ref=nb_sb_noss_1",
+    "https://www.amazon.com/s?k=low+profile+keyboard&i=computers&__mk_it_IT=%C3%85M%C3%85%C5%BD%C3%95%C3%91&crid=E7GZISO0AAIT&sprefix=laptop%2Ccomputers%2C294&ref=nb_sb_noss_1"
+  ],
+  "max_pages_per_search": 35,
+  "max_request_retries": 5,
+  "request_timeout_seconds": 20,
+  "min_delay_seconds": 1.0,
+  "max_delay_seconds": 2.0,
+  "backoff_multiplier": 2.0,
+  "output_json": "products3.json",
+  "sqlite_db_path": "products.db",
+  "user_agent_fallback": "Mozilla/5.0"
+}
